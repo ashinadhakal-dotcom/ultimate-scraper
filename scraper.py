@@ -5,7 +5,7 @@ import json
 import logging
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
@@ -82,7 +82,7 @@ def _extract_date(soup: BeautifulSoup) -> datetime:
             return datetime.fromisoformat(raw)
         except ValueError:
             pass
-    return datetime.utcnow()
+    return datetime.now(timezone.utc)
 
 
 def _extract_title(soup: BeautifulSoup) -> str:
@@ -107,7 +107,7 @@ def _save_article(url: str, html: str, title: str, published_at: datetime) -> Pa
         "url": url,
         "title": title,
         "date": f"{published_at:%Y-%m-%d}",
-        "scraped_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "scraped_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "raw_html": html,
     }
     out_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
